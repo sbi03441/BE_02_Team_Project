@@ -1,1 +1,14 @@
+server:
+  port: 8081
 
+spring:
+  datasource:
+    username: root
+    password: qwe456
+    url: jdbc:mysql://localhost:3306/board?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&useInnoDB=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+jpa:
+  show-sql: true
+  hibernate:
+    ddl-auto: update

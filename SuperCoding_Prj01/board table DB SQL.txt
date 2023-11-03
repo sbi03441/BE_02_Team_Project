@@ -1,0 +1,34 @@
+drop database board;
+
+create database board;
+
+use board;
+
+CREATE TABLE `user` (
+	`user_idx` BIGINT	auto_increment primary key, #유저 식별값
+	`email` varchar(45) NOT NULL, #이메일
+	`password` varchar(100) NOT NULL #비밀번호
+);
+
+
+CREATE TABLE `board` (
+	`board_idx` BIGINT auto_increment primary KEY, #게시물 식별값
+	`user_idx` BIGINT NOT NULL, #유저 식별값
+	`email` VARCHAR(20), #이메일
+	`title` VARCHAR(20), #제목
+	`author` VARCHAR(20), #작성자
+	`created_at` TIMESTAMP NOT NULL default CURRENT_TIMESTAMP, #작성일시
+	`content` longtext NOT NULL, #게시물 내용
+    FOREIGN KEY (user_idx) REFERENCES `user`(user_idx)
+);
+
+CREATE TABLE `comments` (
+	`post_idx` BIGINT auto_increment primary KEY, #댓글 식별값
+	`board_idx` BIGINT NOT NULL, #게시물 식별값
+	`user_idx` BIGINT NOT NULL, #유저 식별값
+	`content` longtext NOT NULL, #댓글 내용
+	`author` VARCHAR(20), #작성자
+	`created_at` TIMESTAMP NOT NULL default CURRENT_TIMESTAMP, #작성일시
+	FOREIGN KEY (user_idx) REFERENCES `user`(user_idx),
+    FOREIGN KEY (board_idx) REFERENCES `board`(board_idx)
+);
