@@ -1,5 +1,6 @@
 package com.b2.supercoding_prj01.web.controller;
 
+import com.b2.supercoding_prj01.dto.UserDto;
 import com.b2.supercoding_prj01.entity.UserEntity;
 import com.b2.supercoding_prj01.repository.UserRepository;
 import com.b2.supercoding_prj01.service.UserService;
@@ -26,8 +27,8 @@ public class UserController {
     private AuthenticationManager authenticationManager;
 //    회원가입 - signup
     @PostMapping("/signup")
-    public ResponseEntity<String> singUp(@RequestBody UserEntity user){
-        return userService.saveUser(user);
+    public ResponseEntity<String> singUp(@RequestBody UserDto userDto){
+        return userService.saveUser(userDto);
     }
 
     @GetMapping("/get")
