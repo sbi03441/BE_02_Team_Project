@@ -20,39 +20,28 @@ import java.util.Map;
 @RequestMapping("/api")
 public class UserController {
 
+
+
     private final UserService userService;
     private final UserRepository userRepository;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
 //    회원가입 - signup
     @PostMapping("/signup")
-    public ResponseEntity<String> singUp(@RequestBody UserDto userDto){
-        return userService.saveUser(userDto);
+    public String register(@RequestBody UserDto userDto) {
+        boolean isSuccess = userService.signUp(userDto);
+        return isSuccess ? "회원 가입이 완료 되었습니다" : "회원가입에 실패하였습니다";
     }
-
-    @GetMapping("/get")
-    public List<UserEntity> getuser(){
-        List<UserEntity> userList = userRepository.findAll();
-        if (userList.isEmpty())
-            return null;
-        else
-            return userList;
-    }
-
+//    @GetMapping("/get")
+//    public List<UserEntity> getuser(){
+//        List<UserEntity> userList = userRepository.findAll();
+//        if (userList.isEmpty())
+//            return null;
+//        else
+//            return userList;
+//    }
 
 
-//    로그인 - login
-    @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        // 사용자 인증 및 토큰 생성
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = tokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new JwtAuthenticationResponse(token));
-    }
+
 
 
 
