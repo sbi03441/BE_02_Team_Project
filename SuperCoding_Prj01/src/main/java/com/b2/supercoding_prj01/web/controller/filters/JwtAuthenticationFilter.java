@@ -1,7 +1,7 @@
 package com.b2.supercoding_prj01.web.controller.filters;
 
 
-import com.b2.supercoding_prj01.config.security.JwtTokenProvider;
+import com.b2.supercoding_prj01.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

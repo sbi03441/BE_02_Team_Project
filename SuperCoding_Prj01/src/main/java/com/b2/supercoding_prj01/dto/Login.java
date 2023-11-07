@@ -1,16 +1,14 @@
 package com.b2.supercoding_prj01.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
 @NoArgsConstructor
-@ToString
-@Builder
+@Getter
 @AllArgsConstructor
-public class UserDto {
+public class Login {
 
     private String email;
     private String password;
-
 }
