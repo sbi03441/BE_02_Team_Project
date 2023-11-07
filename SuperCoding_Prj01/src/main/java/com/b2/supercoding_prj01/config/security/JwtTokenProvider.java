@@ -1,5 +1,6 @@
 package com.b2.supercoding_prj01.config.security;
 
+import com.b2.supercoding_prj01.role.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -28,16 +29,18 @@ public class JwtTokenProvider {
         return request.getHeader("X-AUTH-TOKEN");
     }
 
-    public String createToken(String email, List<String > roles){
-        Claims claims = Jwts.claims()
-                .setSubject(email);
+    // JWT 생성
+    public String createToken(String email, Role role) {
+        Claims claims = Jwts.claims().setSubject(email);
+        claims.put("role", role.toString());
 
-        claims.put("roles", roles);
         Date now = new Date();
+        Date validity = new Date(now.getTime() + tokenValidMillisecond);
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidMillisecond))
+                .setExpiration(validity)
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
@@ -54,6 +57,7 @@ public class JwtTokenProvider {
             return false;
         }
     }
+
     public Authentication getAuthentication(String jwtToken) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(getUserEmail(jwtToken));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());

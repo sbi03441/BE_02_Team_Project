@@ -1,7 +1,7 @@
 package com.b2.supercoding_prj01.entity;
 
 
-import com.b2.supercoding_prj01.roles.Role;
+import com.b2.supercoding_prj01.role.Role;
 import lombok.*;
 
 import javax.persistence.*;
@@ -26,6 +26,5 @@ public class UserEntity {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-
 
 }
