@@ -2,10 +2,14 @@ package com.b2.supercoding_prj01.jwt;
 
 import com.b2.supercoding_prj01.repository.userDetails.CustomUserDetails;
 import com.b2.supercoding_prj01.role.Role;
+import com.sun.net.httpserver.Headers;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.DefaultHeader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,11 +20,13 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtTokenProvider {
-    @Value("spring.jwt.secret")
+    @Value("${security.jwt.secret}")
     private String secretKey;
 
     private long tokenValidMillisecond = 1000L * 60 * 60; //1시간
@@ -30,22 +36,32 @@ public class JwtTokenProvider {
     //secretkey base64 인코딩
     @PostConstruct
     protected void init(){
+        log.info("인코딩 실행되기 전 값");
+        log.info(secretKey);
         secretKey  = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        log.info("init 실행");
+        log.info(secretKey);
     }
 
     // JWT 생성
     public String createToken(String email) {
+
+        Header header = new DefaultHeader();
+        header.setType("JWT");
+
         Claims claims = Jwts.claims().setSubject(email);
-        //claims.put("role", role);
+        claims.put("role", Role.USER);
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + tokenValidMillisecond);
 
         return Jwts.builder()
+                .setHeader((Map<String, Object>) header)
                 .setClaims(claims) //정보저장
                 .setIssuedAt(now) //토큰 발행시간
                 .setExpiration(validity)//토큰 유효 시간
-                .signWith(SignatureAlgorithm.HS256, secretKey) //sha256 알고리즘
+                .signWith(SignatureAlgorithm.HS256, secretKey)//sha256 알고리즘
+
                 .compact();
     }
 

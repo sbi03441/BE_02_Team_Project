@@ -1,30 +1,22 @@
-server:
-  port: 8081
-
 spring:
   datasource:
     username: root
     password: zkvpfkxp12!@
     url: jdbc:mysql://localhost:3306/prj1
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-jpa:
-  show-sql: true
-  hibernate:
-    ddl-auto: update
-
-  security:
-    jwt:
-      header: Authorization
-      #echo 'silvernine-tech-spring-boot-jwt-tutorial-secret-silvernine-tech-spring-boot-jwt-tutorial-secret'|base64
-      secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
-      token-validity-in-seconds: 604800
-
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+security:
+  jwt:
+    header: Authorization
+    secret: 이것은시크릿키야아아아아
+    token-validity-in-seconds: 604800
 mvc:
   pathmatch:
     matching-strategy: ant_path_matcher
-      #    default_batch_fetch_size: 1000
-
-logging.level:
-  org.hibernate.SQL: debug
-  org.hibernate.type: trace
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace

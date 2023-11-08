@@ -9,6 +9,7 @@ import com.b2.supercoding_prj01.jwt.JwtTokenProvider;
 import com.b2.supercoding_prj01.repository.UserRepository;
 import com.b2.supercoding_prj01.role.Role;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -59,7 +61,6 @@ public class UserService {
 
             userRepository.findByEmail(email)
                     .orElseThrow(() -> new NotFoundException("회원이 없습니다"));
-
             return jwtTokenProvider.createToken(email);
         } catch (Exception e) {
             e.printStackTrace();
