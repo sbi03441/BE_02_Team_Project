@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/resources/static/**", "/api/signup").permitAll()
+                .antMatchers("/resources/static/**", "/api/signup", "/api/login").permitAll()
                 //나중에 글 작성 api에 Role_user
                 .and()
                 .exceptionHandling()
@@ -43,6 +43,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

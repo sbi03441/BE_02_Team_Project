@@ -1,6 +1,5 @@
 package com.b2.supercoding_prj01.web.controller;
 
-import com.b2.supercoding_prj01.dto.Login;
 import com.b2.supercoding_prj01.dto.UserRequestDto;
 
 import com.b2.supercoding_prj01.repository.UserRepository;
@@ -21,9 +20,11 @@ public class UserController {
 
 //    회원가입 - signup
     @PostMapping("/signup")
-    public Long register(@RequestBody UserRequestDto userDto) {
+    public String register(@RequestBody UserRequestDto userDto) {
         return userService.signUp(userDto);
     }
+
+
     @PostMapping(value = "/login")
     public String login(@RequestBody UserRequestDto loginRequest, HttpServletResponse httpServletResponse){
         String token = userService.login(loginRequest);

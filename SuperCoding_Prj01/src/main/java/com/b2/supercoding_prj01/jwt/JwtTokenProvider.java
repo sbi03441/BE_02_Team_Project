@@ -25,7 +25,7 @@ public class JwtTokenProvider {
 
     private long tokenValidMillisecond = 1000L * 60 * 60; //1시간
 
-    private CustomUserDetails customUserDetails ;
+    private final CustomUserDetails customUserDetails ;
 
     //secretkey base64 인코딩
     @PostConstruct

@@ -32,21 +32,17 @@ public class UserEntity implements UserDetails {
 
     private String password;
 
-//    @Enumerated(EnumType.STRING)
-//    private Role role;
-//
-//    public void addUserAuthority() {
-//        this.role = Role.USER;
-//    }
-//
+
+    private Role role;
+
 //    public void passwordEncode(PasswordEncoder passwordEncoder) {
 //        this.password = passwordEncoder.encode(password);
 //    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> auth = new ArrayList<>();
-        return auth;
+    List<GrantedAuthority> authorities = new ArrayList<>();
+    authorities.add(new SimpleGrantedAuthority(this.role.getName()));
+    return authorities;
     }
 
     @Override

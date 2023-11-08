@@ -2,7 +2,6 @@ package com.b2.supercoding_prj01.service;
 
 
 
-import com.b2.supercoding_prj01.dto.Login;
 import com.b2.supercoding_prj01.dto.UserRequestDto;
 import com.b2.supercoding_prj01.entity.UserEntity;
 import com.b2.supercoding_prj01.exception.NotFoundException;
@@ -25,11 +24,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-
     private final AuthenticationManager authenticationManager;
 
     @Transactional
-    public Long signUp(UserRequestDto userDto) {
+    public String signUp(UserRequestDto userDto) {
 
         String email = userDto.getEmail();
         String password = userDto.getPassword();
@@ -41,35 +39,32 @@ public class UserService {
         UserEntity user = UserEntity.builder()
                 .email(email)
                 .password(passwordEncoder.encode(password))
-                //    .role(UserEntity.builder().role(Role.USER).build().getRole())
+                .role(Role.USER)
                 .build();
 
         userRepository.save(user);
 
-        return user.getUserId();
+        return "회원가입이 완료 되었습니다.";
     }
-
     @Transactional
     public String login(UserRequestDto loginRequest) {
 
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
-
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            UserEntity user = userRepository.findByEmail(email)
+            userRepository.findByEmail(email)
                     .orElseThrow(() -> new NotFoundException("회원이 없습니다"));
 
-            return jwtTokenProvider.createToken(user.getEmail());
+            return jwtTokenProvider.createToken(email);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
         }
-
     }
 
 
