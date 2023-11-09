@@ -3,16 +3,30 @@ package com.b2.supercoding_prj01.web.controller;
 import com.b2.supercoding_prj01.dto.UserRequestDto;
 
 import com.b2.supercoding_prj01.repository.UserRepository;
+import com.b2.supercoding_prj01.service.JwtService;
 import com.b2.supercoding_prj01.service.UserService;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import com.b2.supercoding_prj01.web.dto.UserDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.List;
+import java.util.Optional;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -27,9 +41,9 @@ public class UserController {
 //    회원가입 - signup
     @PostMapping("/signup")
     public String register(@RequestBody UserRequestDto userDto) {
-        return userService.signUp(userDto);
-    }
 
+
+    }
 
     @PostMapping(value = "/login")
     public String login(@RequestBody UserRequestDto loginRequest, HttpServletResponse httpServletResponse){
@@ -39,7 +53,6 @@ public class UserController {
         String key = "JWT Token : " + loginRequest.getEmail();
         String value = redisTemplate.opsForValue().get(key);
 
-        return "로그인이 성공하였습니다.";
     }
 
     @GetMapping("/test")
@@ -47,10 +60,12 @@ public class UserController {
         return userService.test(userRequestDto);
     }
 
+
     @PostMapping("/logout")
     public String  logout(@RequestBody UserRequestDto userRequestDto,HttpServletResponse httpServletResponse){
         userService.logout(userRequestDto);
         return "로그아웃 완료";
     }
+
 
 }
