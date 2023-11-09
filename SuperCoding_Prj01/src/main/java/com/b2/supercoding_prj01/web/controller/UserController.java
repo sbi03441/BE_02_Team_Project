@@ -5,6 +5,7 @@ import com.b2.supercoding_prj01.dto.UserRequestDto;
 import com.b2.supercoding_prj01.repository.UserRepository;
 import com.b2.supercoding_prj01.service.UserService;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,11 @@ public class UserController {
     public String  logout(@RequestBody UserRequestDto userRequestDto,HttpServletResponse httpServletResponse){
         userService.logout(userRequestDto);
         return "로그아웃 완료";
+    }
+
+    @GetMapping("/validate")
+    public void validate(){
+        System.out.println("유효한 토~큰~");
     }
 
 
