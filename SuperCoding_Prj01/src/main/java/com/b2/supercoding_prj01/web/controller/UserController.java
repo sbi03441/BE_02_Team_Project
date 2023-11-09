@@ -1,60 +1,71 @@
 package com.b2.supercoding_prj01.web.controller;
 
-import com.b2.supercoding_prj01.entity.UserEntity;
+import com.b2.supercoding_prj01.dto.UserRequestDto;
+
 import com.b2.supercoding_prj01.repository.UserRepository;
 import com.b2.supercoding_prj01.service.JwtService;
 import com.b2.supercoding_prj01.service.UserService;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+
 import com.b2.supercoding_prj01.web.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+
+import javax.servlet.http.HttpServletResponse;
 
 import java.util.List;
 import java.util.Optional;
 
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Slf4j
 public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
-    private final JwtService jwtService;
+    private final RedisTemplate<String , String > redisTemplate;
 
 //    회원가입 - signup
     @PostMapping("/signup")
-    public ResponseEntity<String> singUp(@RequestBody UserDto user){
-        return userService.saveUser(user);
+    public String register(@RequestBody UserRequestDto userDto) {
+
+
     }
 
-    @GetMapping("/get")
-    public List<UserEntity> getuser(){
-        List<UserEntity> userList = userRepository.findAll();
-        if (userList.isEmpty())
-            return null;
-        else
-            return userList;
+    @PostMapping(value = "/login")
+    public String login(@RequestBody UserRequestDto loginRequest, HttpServletResponse httpServletResponse){
+        String token = userService.login(loginRequest);
+        redisTemplate.opsForValue().set(loginRequest.getEmail(), token);
+        httpServletResponse.setHeader("X-AUTH-TOKEN", token);
+        String key = "JWT Token : " + loginRequest.getEmail();
+        String value = redisTemplate.opsForValue().get(key);
+
+    }
+
+    @GetMapping("/test")
+    public boolean test(@RequestBody UserRequestDto userRequestDto){
+        return userService.test(userRequestDto);
     }
 
 
-
-//    로그인 - login
-    @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody UserDto user) {
-            if(userService.checkUser(user)){
-                String token = jwtService.createToken(userRepository.findUserIdByEmail(user.getEmail())); // 토큰 생성
-                HttpHeaders headers = jwtService.addTokenToHeaders(token); // HttpHeaders 에 도큰 추가
-                return ResponseEntity.status(200).headers(headers).body(user.getEmail() + "님 반갑습니다.");
-            }
-            else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("존재 하지 않는 user입니다.");
+    @PostMapping("/logout")
+    public String  logout(@RequestBody UserRequestDto userRequestDto,HttpServletResponse httpServletResponse){
+        userService.logout(userRequestDto);
+        return "로그아웃 완료";
     }
-
 
 
 }
