@@ -92,7 +92,7 @@ public class UserService {
             redisTemplate.delete(userRequestDto.getEmail()); //Token 삭제
         }
     }
-
+    //로그아웃 테스트용 api --> 토큰 유효성 검사
     public boolean test(@RequestBody UserRequestDto userRequestDto){
 
         if(redisTemplate.opsForValue().get("logout: " + userRequestDto.getEmail()) != null){
