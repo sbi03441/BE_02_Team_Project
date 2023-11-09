@@ -3,29 +3,18 @@ package com.b2.supercoding_prj01.web.controller;
 import com.b2.supercoding_prj01.dto.UserRequestDto;
 
 import com.b2.supercoding_prj01.repository.UserRepository;
-import com.b2.supercoding_prj01.service.JwtService;
 import com.b2.supercoding_prj01.service.UserService;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import com.b2.supercoding_prj01.web.dto.UserDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import javax.print.DocFlavor;
 import javax.servlet.http.HttpServletResponse;
-
-import java.util.List;
-import java.util.Optional;
 
 
 @RestController
@@ -52,7 +41,7 @@ public class UserController {
         httpServletResponse.setHeader("X-AUTH-TOKEN", token);
         String key = "JWT Token : " + loginRequest.getEmail();
         String value = redisTemplate.opsForValue().get(key);
-
+        return "로그인 완료";
     }
 
     @GetMapping("/test")
