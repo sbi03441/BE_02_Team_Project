@@ -1,7 +1,5 @@
-package com.b2.supercoding_prj01.repository;
+package com.b2.supercoding_prj01.repository.board;
 
-import com.b2.supercoding_prj01.entity.BoardEntity;
-import com.b2.supercoding_prj01.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
