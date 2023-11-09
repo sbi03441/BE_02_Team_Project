@@ -19,9 +19,8 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Table(name = "user")
-@Builder
-@AllArgsConstructor
 public class UserEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +45,7 @@ public class UserEntity implements UserDetails {
     authorities.add(new SimpleGrantedAuthority(this.role.getName()));
     return authorities;
     }
+
 
     @Override
     public String getUsername() {
