@@ -9,14 +9,22 @@ import com.b2.supercoding_prj01.jwt.JwtTokenProvider;
 import com.b2.supercoding_prj01.repository.UserRepository;
 import com.b2.supercoding_prj01.role.Role;
 import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.redis.core.RedisTemplate;
+
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +35,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final RedisTemplate<String,String> redisTemplate;
 
     @Transactional
     public String signUp(UserRequestDto userDto) {
@@ -61,11 +70,38 @@ public class UserService {
 
             userRepository.findByEmail(email)
                     .orElseThrow(() -> new NotFoundException("회원이 없습니다"));
+
+            if(redisTemplate.opsForValue().get("logout: " + loginRequest.getEmail()) != null){
+                redisTemplate.delete("logout: " + loginRequest.getEmail());
+            }
+
             return jwtTokenProvider.createToken(email);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException();
+            throw new BadCredentialsException("잘못된 자격증명입니다");
         }
+    }
+
+
+    @Transactional
+    public void logout(@RequestBody UserRequestDto userRequestDto) {
+        //Token에서 로그인한 사용자 정보 get해 로그아웃 처리
+
+        if (redisTemplate.opsForValue().get(userRequestDto.getEmail()) != null) {
+            redisTemplate.opsForValue().set("logout: " + userRequestDto.getEmail(), "logout");
+            redisTemplate.delete(userRequestDto.getEmail()); //Token 삭제
+        }
+    }
+
+    public boolean test(@RequestBody UserRequestDto userRequestDto){
+
+        if(redisTemplate.opsForValue().get("logout: " + userRequestDto.getEmail()) != null){
+            return false;
+        }
+        else{
+            System.out.println("정상적인 key ");
+        }
+        return true;
     }
 
 

@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/resources/static/**", "/api/signup", "/api/login").permitAll()
+                .antMatchers("/api/test").hasRole("USER")
                 //나중에 글 작성 api에 Role_user
                 .and()
                 .exceptionHandling()

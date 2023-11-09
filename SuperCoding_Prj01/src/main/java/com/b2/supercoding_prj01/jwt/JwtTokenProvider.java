@@ -36,11 +36,7 @@ public class JwtTokenProvider {
     //secretkey base64 인코딩
     @PostConstruct
     protected void init(){
-        log.info("인코딩 실행되기 전 값");
-        log.info(secretKey);
         secretKey  = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        log.info("init 실행");
-        log.info(secretKey);
     }
 
     // JWT 생성
