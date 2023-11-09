@@ -30,10 +30,8 @@ public class UserController {
 //    회원가입 - signup
     @PostMapping("/signup")
     public String register(@RequestBody UserRequestDto userDto) {
-
-
+        return userService.signUp(userDto);
     }
-
     @PostMapping(value = "/login")
     public String login(@RequestBody UserRequestDto loginRequest, HttpServletResponse httpServletResponse){
         String token = userService.login(loginRequest);
