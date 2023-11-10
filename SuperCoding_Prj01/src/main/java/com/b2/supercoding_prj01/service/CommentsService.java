@@ -69,7 +69,7 @@ public class CommentsService {
             throw new EntityNotFoundException("해당 게시물에 작성한 댓글이 없습니다.");
         }
     }
-    public void deleteComment(CommentsDto2 commentsDto, long postId) {
+    public void deleteComment(long postId) {
         Optional<CommentsEntity> existingComment = commentsRepository.findByPostId(postId);
         if (existingComment.isPresent()) {
             commentsRepository.deleteById(postId);

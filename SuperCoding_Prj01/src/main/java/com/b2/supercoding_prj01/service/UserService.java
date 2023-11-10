@@ -106,5 +106,16 @@ public class UserService {
         return true;
     }
 
+    public boolean test2(String email){
+
+        if(redisTemplate.opsForValue().get("logout: " + email) != null){
+            return false;
+        }
+        else{
+            System.out.println("정상적인 key ");
+        }
+        return true;
+    }
+
 
 }

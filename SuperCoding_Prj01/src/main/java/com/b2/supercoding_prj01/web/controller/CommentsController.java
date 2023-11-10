@@ -10,6 +10,7 @@ import com.b2.supercoding_prj01.repository.HeartRepository;
 import com.b2.supercoding_prj01.repository.UserRepository;
 import com.b2.supercoding_prj01.service.CommentsService;
 import com.b2.supercoding_prj01.service.HeartService;
+import com.b2.supercoding_prj01.service.UserService;
 import com.b2.supercoding_prj01.web.dto.CommentsDto;
 import com.b2.supercoding_prj01.web.dto.CommentsDto2;
 import com.b2.supercoding_prj01.web.dto.UserDto;
@@ -35,6 +36,7 @@ public class CommentsController {
     private final JwtTokenProvider jwtTokenProvider;
     private final CommentsService commentsService;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping("")
     public List<CommentsDto> findAll(){
@@ -54,7 +56,7 @@ public class CommentsController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createComment(@RequestBody CommentsDto2 commentsDto,
-                                           @RequestHeader("TOKEN") String token) {
+                                           @RequestHeader("X-AUTH-TOKEN") String token) {
         String author = jwtTokenProvider.findEmailBytoken(token);
         Optional<UserEntity> user = userRepository.findByEmail(author);
 
@@ -69,7 +71,9 @@ public class CommentsController {
     }
 
     @PutMapping("/{postId}")
-    public ResponseEntity<?> updateComment(@PathVariable long postId, @RequestBody CommentsDto2 commentsDto, @RequestHeader("TOKEN") String token) {
+    public ResponseEntity<?> updateComment(@PathVariable long postId,
+                                           @RequestBody CommentsDto2 commentsDto,
+                                           @RequestHeader("X-AUTH-TOKEN") String token) {
         String author = jwtTokenProvider.findEmailBytoken(token);
 
         Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
@@ -84,13 +88,14 @@ public class CommentsController {
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long postId, @RequestBody CommentsDto2 commentsDto, @RequestHeader("TOKEN") String token) {
+    public ResponseEntity<?> deleteComment(@PathVariable Long postId,
+                                           @RequestHeader("X-AUTH-TOKEN") String token) {
         String author = jwtTokenProvider.findEmailBytoken(token);
 
         Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
         if (comments.isPresent()) {
             if (author.equals(commentsRepository.findByPostId(postId).get().getUser().getEmail())) {
-                commentsService.deleteComment(commentsDto, postId);
+                commentsService.deleteComment(postId);
                 return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 삭제되었습니다.");
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("다른 유저의 댓글입니다.");
@@ -101,21 +106,23 @@ public class CommentsController {
     // 해당 댓글에 좋아요 추가
     @Transactional
     @PostMapping("/heart")
-    public ResponseEntity<String> addHeart(@RequestHeader("TOKEN") String token,
-                                        @RequestParam Long postId
+    public ResponseEntity<String> addHeart(@RequestHeader("X-AUTH-TOKEN") String token,
+                                            @RequestParam Long postId
                                            ){
         if(token.isEmpty())
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("token이 없습니다.");
         else {
             String email = jwtTokenProvider.findEmailBytoken(token);
-            return email.isBlank()? ResponseEntity.status(HttpStatus.FORBIDDEN).body("token이 없습니다."): heartService.clickHeart(postId, email);
+            if(userService.test2(email)){
+                return email.isBlank()? ResponseEntity.status(HttpStatus.FORBIDDEN).body("token이 없습니다."): heartService.clickHeart(postId, email);
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("로그아웃된 사용자입니다.");
         }
     }
 
     // 해당 댓글에 좋아요 정보
     @GetMapping("/{postId}/heart")
-    public List<HeartEntity> findHeartToPostId(@PathVariable Long postId,
-                                               @RequestBody UserDto dto){
+    public List<HeartEntity> findHeartToPostId(@PathVariable Long postId){
         Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
 
         return comments.map(heartRepository::findByComments).orElse(null);
