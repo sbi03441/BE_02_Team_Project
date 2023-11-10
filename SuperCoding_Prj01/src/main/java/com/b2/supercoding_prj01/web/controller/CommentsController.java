@@ -39,35 +39,44 @@ public class CommentsController {
     private final UserService userService;
 
     @GetMapping("")
-    public List<CommentsDto> findAll(){
-        List<CommentsEntity> commentsEntities = commentsService.findAll();
-        return commentsEntities.stream()
-                .map(CommentsDto::fromEntity)
-                .collect(Collectors.toList());
+    public List<CommentsDto> findAll(@RequestHeader("X-AUTH-TOKEN") String token){
+        String author = jwtTokenProvider.findEmailBytoken(token);
+        if(userService.test2(author)) {
+            List<CommentsEntity> commentsEntities = commentsService.findAll();
+            return commentsEntities.stream()
+                    .map(CommentsDto::fromEntity)
+                    .collect(Collectors.toList());
+        }else return null;
     }
 
     @GetMapping("/{boardId}")
-    public List<CommentsDto> findByBoardId(@PathVariable long boardId){
-        List<CommentsEntity> commentsEntities = commentsService.findByAllBoardId(boardId);
-        return commentsEntities.stream()
-                .map(CommentsDto::fromEntity)
-                .collect(Collectors.toList());
+    public List<CommentsDto> findByBoardId(@RequestHeader("X-AUTH-TOKEN") String token,
+                                           @PathVariable long boardId){
+        String author = jwtTokenProvider.findEmailBytoken(token);
+        if(userService.test2(author)) {
+            List<CommentsEntity> commentsEntities = commentsService.findByAllBoardId(boardId);
+            return commentsEntities.stream()
+                    .map(CommentsDto::fromEntity)
+                    .collect(Collectors.toList());
+        }else return null;
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> createComment(@RequestBody CommentsDto2 commentsDto,
                                            @RequestHeader("X-AUTH-TOKEN") String token) {
         String author = jwtTokenProvider.findEmailBytoken(token);
-        Optional<UserEntity> user = userRepository.findByEmail(author);
+        if(userService.test2(author)) {
+            Optional<UserEntity> user = userRepository.findByEmail(author);
 
-        if(user.isEmpty())
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("없는 user입니다.");
-        else {
-            commentsDto.setAuthor(author);
-            commentsDto.setUserId(user.get().getUserId());
-            commentsService.saveComment(commentsDto);
-            return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 작성되었습니다.");
-        }
+            if (user.isEmpty())
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("없는 user입니다.");
+            else {
+                commentsDto.setAuthor(author);
+                commentsDto.setUserId(user.get().getUserId());
+                commentsService.saveComment(commentsDto);
+                return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 작성되었습니다.");
+            }
+        }else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("로그아웃된 사용자입니다.");
     }
 
     @PutMapping("/{postId}")
@@ -75,32 +84,36 @@ public class CommentsController {
                                            @RequestBody CommentsDto2 commentsDto,
                                            @RequestHeader("X-AUTH-TOKEN") String token) {
         String author = jwtTokenProvider.findEmailBytoken(token);
-
-        Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
-        if (comments.isPresent()) {
-            if (author.equals(commentsRepository.findByPostId(postId).get().getUser().getEmail())) {
-                commentsService.updateComment(commentsDto, postId);
-                return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 수정되었습니다.");
+        if(userService.test2(author)) {
+            Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
+            if (comments.isPresent()) {
+                if (author.equals(commentsRepository.findByPostId(postId).get().getUser().getEmail())) {
+                    commentsService.updateComment(commentsDto, postId);
+                    return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 수정되었습니다.");
+                } else {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("수정 가능한 댓글이 없습니다.");
+                }
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("수정 가능한 댓글이 없습니다.");
             }
-        }else {return ResponseEntity.status(HttpStatus.FORBIDDEN).body("수정 가능한 댓글이 없습니다.");}
+        }else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("로그아웃된 사용자입니다.");
     }
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long postId,
                                            @RequestHeader("X-AUTH-TOKEN") String token) {
         String author = jwtTokenProvider.findEmailBytoken(token);
-
-        Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
-        if (comments.isPresent()) {
-            if (author.equals(commentsRepository.findByPostId(postId).get().getUser().getEmail())) {
-                commentsService.deleteComment(postId);
-                return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 삭제되었습니다.");
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("다른 유저의 댓글입니다.");
-            }
-        }else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("삭제 가능한 댓글이 없습니다.");
+        if(userService.test2(author)){
+            Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
+            if (comments.isPresent()) {
+                if (author.equals(commentsRepository.findByPostId(postId).get().getUser().getEmail())) {
+                    commentsService.deleteComment(postId);
+                    return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 삭제되었습니다.");
+                } else {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("다른 유저의 댓글입니다.");
+                }
+            }else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("삭제 가능한 댓글이 없습니다.");
+        }else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("로그아웃된 사용자입니다.");
     }
 
     // 해당 댓글에 좋아요 추가
@@ -122,7 +135,10 @@ public class CommentsController {
 
     // 해당 댓글에 좋아요 정보
     @GetMapping("/{postId}/heart")
-    public List<HeartEntity> findHeartToPostId(@PathVariable Long postId){
+    public List<HeartEntity> findHeartToPostId(@RequestHeader("X-AUTH-TOKEN") String token,
+                                               @PathVariable Long postId){
+        String author = jwtTokenProvider.findEmailBytoken(token);
+        if(userService.test2(author)){
         Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
 
         return comments.map(heartRepository::findByComments).orElse(null);
@@ -130,5 +146,8 @@ public class CommentsController {
 //      = if(comments.isPresent())
 //            return heartRepository.findByComments(comments.get());
 //        else return null;
+        }else {
+            return null;
+        }
     }
 }
