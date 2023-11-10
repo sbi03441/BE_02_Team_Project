@@ -1,7 +1,5 @@
-package com.b2.supercoding_prj01.repository.comments;
+package com.b2.supercoding_prj01.entity;
 
-import com.b2.supercoding_prj01.repository.board.BoardEntity;
-import com.b2.supercoding_prj01.repository.user.UserEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

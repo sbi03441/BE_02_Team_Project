@@ -1,6 +1,6 @@
-package com.b2.supercoding_prj01.repository.board;
+package com.b2.supercoding_prj01.entity;
 
-import com.b2.supercoding_prj01.repository.user.UserEntity;
+import com.b2.supercoding_prj01.entity.UserEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
