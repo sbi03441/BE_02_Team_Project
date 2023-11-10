@@ -36,4 +36,8 @@ public class CommentsEntity {
     public void setHeart(Integer heart) {
         this.heart = heart;
     }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 }

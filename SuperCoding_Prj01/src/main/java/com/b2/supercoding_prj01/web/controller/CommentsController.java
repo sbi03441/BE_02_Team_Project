@@ -3,11 +3,15 @@ package com.b2.supercoding_prj01.web.controller;
 import com.b2.supercoding_prj01.dto.UserRequestDto;
 import com.b2.supercoding_prj01.entity.CommentsEntity;
 import com.b2.supercoding_prj01.entity.HeartEntity;
+import com.b2.supercoding_prj01.entity.UserEntity;
 import com.b2.supercoding_prj01.jwt.JwtTokenProvider;
 import com.b2.supercoding_prj01.repository.CommentsRepository;
 import com.b2.supercoding_prj01.repository.HeartRepository;
 import com.b2.supercoding_prj01.repository.UserRepository;
+import com.b2.supercoding_prj01.service.CommentsService;
 import com.b2.supercoding_prj01.service.HeartService;
+import com.b2.supercoding_prj01.web.dto.CommentsDto;
+import com.b2.supercoding_prj01.web.dto.CommentsDto2;
 import com.b2.supercoding_prj01.web.dto.UserDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,8 +33,70 @@ public class CommentsController {
     private final HeartRepository heartRepository;
     private final HeartService heartService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final CommentsService commentsService;
+    private final UserRepository userRepository;
 
+    @GetMapping("")
+    public List<CommentsDto> findAll(){
+        List<CommentsEntity> commentsEntities = commentsService.findAll();
+        return commentsEntities.stream()
+                .map(CommentsDto::fromEntity)
+                .collect(Collectors.toList());
+    }
 
+    @GetMapping("/{boardId}")
+    public List<CommentsDto> findByBoardId(@PathVariable long boardId){
+        List<CommentsEntity> commentsEntities = commentsService.findByAllBoardId(boardId);
+        return commentsEntities.stream()
+                .map(CommentsDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createComment(@RequestBody CommentsDto2 commentsDto,
+                                           @RequestHeader("TOKEN") String token) {
+        String author = jwtTokenProvider.findEmailBytoken(token);
+        Optional<UserEntity> user = userRepository.findByEmail(author);
+
+        if(user.isEmpty())
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("없는 user입니다.");
+        else {
+            commentsDto.setAuthor(author);
+            commentsDto.setUserId(user.get().getUserId());
+            commentsService.saveComment(commentsDto);
+            return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 작성되었습니다.");
+        }
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<?> updateComment(@PathVariable long postId, @RequestBody CommentsDto2 commentsDto, @RequestHeader("TOKEN") String token) {
+        String author = jwtTokenProvider.findEmailBytoken(token);
+
+        Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
+        if (comments.isPresent()) {
+            if (author.equals(commentsRepository.findByPostId(postId).get().getUser().getEmail())) {
+                commentsService.updateComment(commentsDto, postId);
+                return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 수정되었습니다.");
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("수정 가능한 댓글이 없습니다.");
+            }
+        }else {return ResponseEntity.status(HttpStatus.FORBIDDEN).body("수정 가능한 댓글이 없습니다.");}
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long postId, @RequestBody CommentsDto2 commentsDto, @RequestHeader("TOKEN") String token) {
+        String author = jwtTokenProvider.findEmailBytoken(token);
+
+        Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
+        if (comments.isPresent()) {
+            if (author.equals(commentsRepository.findByPostId(postId).get().getUser().getEmail())) {
+                commentsService.deleteComment(commentsDto, postId);
+                return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 삭제되었습니다.");
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("다른 유저의 댓글입니다.");
+            }
+        }else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("삭제 가능한 댓글이 없습니다.");
+    }
 
     // 해당 댓글에 좋아요 추가
     @Transactional
