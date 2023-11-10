@@ -29,6 +29,7 @@ public class JwtTokenProvider {
     @Value("${security.jwt.secret}")
     private String secretKey;
 
+
     private long tokenValidMillisecond = 1000L * 60 * 60; //1시간
 
     private final CustomUserDetails customUserDetails ;
@@ -94,5 +95,14 @@ public class JwtTokenProvider {
         }catch (Exception e){
             return false;
         }
+    }
+
+    public String findEmailBytoken(String token) {
+
+        // JWT 토큰을 디코딩하여 페이로드를 얻기
+        Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+
+        // "userId" 클레임의 값을 얻기
+        return claims.isEmpty() ? null : claims.get("sub", String.class);
     }
 }
