@@ -21,18 +21,18 @@ public class HeartService {
     private final UserRepository userRepository;
     private final HeartRepository heartRepository;
 
-    public ResponseEntity<String> clickHeart(Long postId, Long userId) {
+    public ResponseEntity<String> clickHeart(Long postId, String email) {
         Optional<CommentsEntity> comments = commentsRepository.findByPostId(postId);
-        Optional<UserEntity> user = userRepository.findByUserId(userId);
+        Optional<UserEntity> user = userRepository.findByEmail(email);
 
         if(comments.isPresent() && user.isPresent()) {
             if(heartRepository.findByUser(user.get()).isEmpty()) {
                 setHeart(comments.get(), user.get(), comments.get().getHeart(), true);
-                return ResponseEntity.ok().body(postId + " 댓글에 좋아요가 추가되었습니다.");
+                return ResponseEntity.ok().body(postId + "번 댓글에 좋아요가 추가되었습니다.");
             }
             else {
                 setHeart(comments.get(),user.get(), comments.get().getHeart(), false);
-                return ResponseEntity.ok().body(postId + " 댓글에 좋아요가 삭제되었습니다.");
+                return ResponseEntity.ok().body(postId + "번 댓글에 좋아요가 삭제되었습니다.");
             }
         }else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("잘못된 접근입니다.");
     }
