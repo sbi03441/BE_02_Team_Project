@@ -29,6 +29,10 @@ public class JwtTokenProvider {
     @Value("${security.jwt.secret}")
     private String secretKey;
 
+    public String getSecretKey() {
+        return secretKey;
+    }
+
     private long tokenValidMillisecond = 1000L * 60 * 60; //1시간
 
     private final CustomUserDetails customUserDetails ;
